@@ -5,7 +5,13 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-import "./tailwind.css";
+import Sidebar from "./components/Sidebar";
+
+import css from "./tailwind.css?url";
+import { LinksFunction } from "@remix-run/node";
+import { OverlayProvider } from "./components/Overlay";
+
+export const links: LinksFunction = () => [{ rel: "stylesheet", href: css }];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -26,5 +32,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <OverlayProvider>
+      <main className="flex flex-col h-screen bg-gray-100">
+        <Sidebar />
+        <section className="flex-1 p-10">
+          <Outlet />
+        </section>
+      </main>
+    </OverlayProvider>
+  );
 }

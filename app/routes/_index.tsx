@@ -1,48 +1,71 @@
-import type { MetaFunction } from "@remix-run/node";
+import { json, type LoaderFunction, type MetaFunction } from "@remix-run/node";
+import { Link, useLoaderData } from "@remix-run/react";
+import { useEffect, useRef } from "react";
+import ContactDetails from "~/components/ContactDetails";
+import { useOverlay } from "~/components/Overlay";
+import { getContacts } from "~/data";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Contacts" },
+    { name: "description", content: "Remix contacts tutorial!" },
   ];
 };
 
+export const loader: LoaderFunction = async () => {
+  const contacts = await getContacts();
+  return json({ contacts });
+};
+
 export default function Index() {
+  const { contacts } = useLoaderData<typeof loader>();
+  const { showOverlay, hideOverlay, isVisible } = useOverlay();
+  const prevIsVisible = useRef(isVisible);
+
+  useEffect(() => {
+    if (prevIsVisible.current && !isVisible) {
+      hideOverlay();
+      window.history.pushState({}, "", `/`);
+    }
+
+    prevIsVisible.current = isVisible;
+  }, [isVisible, hideOverlay]);
+
   return (
-    <div className="font-sans p-4">
-      <h1 className="text-3xl">Welcome to Remix</h1>
-      <ul className="list-disc mt-4 pl-6 space-y-2">
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/start/quickstart"
-            rel="noreferrer"
-          >
-            5m Quick Start
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/start/tutorial"
-            rel="noreferrer"
-          >
-            30m Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/docs"
-            rel="noreferrer"
-          >
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div className="flex flex-row flex-wrap gap-3">
+      {contacts.map(({ id, first, avatar, last, twitter, notes }) => (
+        <Link
+          key={id}
+          to={`/contacts/${id}`}
+          onClick={(event) => {
+            event.preventDefault();
+            showOverlay(
+              <ContactDetails
+                avatar={avatar}
+                first={first}
+                last={last}
+                twitter={twitter}
+                notes={notes}
+              />
+            );
+            window.history.pushState({}, "", `/contacts/${id}`);
+          }}
+          className="flex items-center p-4 mb-4 bg-white rounded-lg shadow-md"
+        >
+          <img
+            src={avatar}
+            alt={`${first} ${last}`}
+            className="w-16 h-16 rounded-full"
+          />
+          <div className="ml-4">
+            <h2 className="text-lg font-semibold">
+              {first} {last}
+            </h2>
+            <p className="text-sm text-gray-500">{twitter}</p>
+            <p className="mt-2 text-sm text-gray-700">{notes}</p>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }
