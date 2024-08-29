@@ -37,7 +37,7 @@ export default function Index() {
         <Link
           key={id}
           to={`/contacts/${id}`}
-          onClick={(event) => {
+          onClick={async (event) => {
             event.preventDefault();
             showOverlay(
               <ContactDetails
@@ -49,21 +49,18 @@ export default function Index() {
               />
             );
             window.history.pushState({}, "", `/contacts/${id}`);
+            await fetch("/", {
+              method: "POST",
+            });
           }}
-          className="flex items-center p-4 mb-4 bg-white rounded-lg shadow-md"
         >
-          <img
-            src={avatar}
-            alt={`${first} ${last}`}
-            className="w-16 h-16 rounded-full"
+          <ContactDetails
+            avatar={avatar}
+            first={first}
+            last={last}
+            twitter={twitter}
+            notes={notes}
           />
-          <div className="ml-4">
-            <h2 className="text-lg font-semibold">
-              {first} {last}
-            </h2>
-            <p className="text-sm text-gray-500">{twitter}</p>
-            <p className="mt-2 text-sm text-gray-700">{notes}</p>
-          </div>
         </Link>
       ))}
     </div>

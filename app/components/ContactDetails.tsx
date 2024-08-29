@@ -11,6 +11,7 @@ const ContactDetails = ({
     <div className="max-w-lg mx-auto p-4 bg-white shadow-md rounded-lg">
       <div className="flex items-center mb-4">
         <img
+          loading="lazy"
           src={avatar || "https://via.placeholder.com/150"}
           alt={`${first} ${last}`}
           className="w-24 h-24 rounded-full border-2 border-gray-300"

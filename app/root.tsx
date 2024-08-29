@@ -8,10 +8,27 @@ import {
 import Sidebar from "./components/Sidebar";
 
 import css from "./tailwind.css?url";
-import { LinksFunction } from "@remix-run/node";
+import { ActionFunctionArgs, LinksFunction } from "@remix-run/node";
 import { OverlayProvider } from "./components/Overlay";
+import { randomCookie } from "./cookies.server";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: css }];
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const cookieHeaders = request.headers.get("Cookie");
+  const cookie = (await randomCookie.parse(cookieHeaders)) || {};
+
+  cookie.toto = "tata";
+
+  const response = new Response(JSON.stringify({ success: true }), {
+    headers: {
+      "Content-Type": "application/json",
+      "Set-Cookie": await randomCookie.serialize(cookie),
+    },
+  });
+
+  return response;
+};
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
